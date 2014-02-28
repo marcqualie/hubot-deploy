@@ -47,6 +47,7 @@ class Deployment
       config: @application
 
   post: (cb) ->
+    self = this
     path = "repos/#{@repository}/deployments"
 
     api.post path, @requestBody(), (err, status, body, headers) ->
@@ -59,16 +60,19 @@ class Deployment
         bodyMessage = data['message']
 
         if bodyMessage.match(/No successful commit statuses/)
-          message = "I don't see a successful build for #{@repository} that covers the latest \"#{@ref}\" branch."
+          message = "I don't see a successful build for #{self.repository} that covers the latest \"#{self.ref}\" branch."
 
         if bodyMessage.match(/Conflict merging ([-_\.0-9a-z]+)/)
           default_branch = data.message.match(/Conflict merging ([-_\.0-9a-z]+)/)[1]
-          message = "There was a problem merging the #{default_branch} for #{@repository} into #{@ref}. You'll need to merge it manually, or disable auto-merging."
+          message = "There was a problem merging the #{default_branch} for #{self.repository} into #{self.ref}. You'll need to merge it manually, or disable auto-merging."
 
         if bodyMessage.match(/Merged ([-_\.0-9a-z]+) into/)
-          console.log "Successfully merged the default branch for #{deployment.repository} into #{@ref}. Normal push notifications should provide feedback."
+          console.log "Successfully merged the default branch for #{self.repository} into #{@ref}. Normal push notifications should provide feedback."
         else
           message = bodyMessage
+
+      else
+        message = "Deploying #{self.repository} to #{self.env} (##{data['id']})"
 
       cb(message)
 
