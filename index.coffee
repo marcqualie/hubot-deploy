@@ -53,5 +53,5 @@ module.exports = (robot) ->
     console.log JSON.stringify(deployment.requestBody())
 
     deployment.post (responseMessage) ->
-      msg.reply responseMessage if responseMessage?
+      msg.send responseMessage if responseMessage?
 
